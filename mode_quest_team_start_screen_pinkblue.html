@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Mode Quest – เกมฐานนิยมแบบทีม (มีบันทึกผล)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --pink: #ffb7d5;
+      --pink-light: #ffe3f0;
+      --blue: #b3d9ff;
+      --blue-light: #e5f2ff;
+      --text-dark: #4a4a4a;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--pink-light), var(--blue-light));
+    }
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px 18px 18px;
+      border-radius: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+      border: 3px solid var(--pink);
+    }
+    h1 {
+      font-size: 22px;
+      text-align: center;
+      margin-bottom: 6px;
+      color: #d63384;
+      font-weight: 700;
+    }
+    h2 {
+      font-size: 17px;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      color: #6f42c1;
+    }
+    p, label {
+      font-size: 14px;
+      color: var(--text-dark);
+    }
+    .section-card {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--pink-light);
+      border: 2px solid var(--pink);
+    }
+    .section-card.blue {
+      background: var(--blue-light);
+      border-color: var(--blue);
+    }
+    .inputs-row {
+      display: flex;
+      gap: 4px;
+      margin: 8px 0 12px;
+    }
+    .inputs-row input {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 2px solid var(--blue);
+      background: #ffffff;
+      text-align: center;
+    }
+    .label {
+      font-size: 14px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .text-input, .answer-input, textarea {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 2px solid var(--blue);
+      background: #ffffff;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 50px;
+    }
+    .no-mode-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 13px;
+    }
+    .no-mode-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    button {
+      flex: 1;
+      padding: 10px;
+      font-size: 15px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .btn-primary {
+      background: #ff80bf;
+    }
+    .btn-secondary {
+      background: #9ecbff;
+      color: #003366;
+    }
+    .btn-warning {
+      background: #ffaf4d;
+      color: #4e2a00;
+    }
+    .btn-small {
+      flex: none;
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 999px;
+    }
+    .btn-outline {
+      background: #ffffff;
+      color: #1565c0;
+      border: 2px solid #90caf9;
+    }
+    .result {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      border: 2px solid;
+    }
+    .result.correct {
+      background: #e6ffea;
+      border-color: #66cc88;
+      color: #1b5e20;
+    }
+    .result.incorrect {
+      background: #ffe6eb;
+      border-color: #ff99aa;
+      color: #b71c1c;
+    }
+    .result.neutral {
+      background: #f3f3f3;
+      border-color: #cccccc;
+    }
+    .small {
+      font-size: 12px;
+      color: #777;
+      margin-top: 2px;
+    }
+    .scoreboard {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--blue-light);
+      border: 2px solid var(--blue);
+    }
+    .scoreboard-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 15px;
+      color: #0d47a1;
+    }
+    .scoreboard-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 2px 0;
+      font-size: 14px;
+    }
+    .team-name-display {
+      font-weight: 600;
+      font-size: 15px;
+      color: #0b3c8c;
+      margin-top: 4px;
+    }
+    .history-container {
+      margin-top: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+      background: #ffffff;
+      padding: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 4px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #fde2ff;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .chip-correct {
+      color: #1b5e20;
+      font-weight: 600;
+    }
+    .chip-incorrect {
+      color: #b71c1c;
+      font-weight: 600;
+    }
+    .credit {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 12px;
+      color: #555;
+      background: var(--blue-light);
+      padding: 10px;
+      border-radius: 12px;
+      border: 2px solid var(--blue);
+      font-weight: 600;
+    }
+    .badge-pill {
+      display: inline-block;
+      background: #ffd6f2;
+      color: #c2185b;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mode Quest – เกมฐานนิยมแบบทีม</h1>
+    <p style="text-align:center; font-size:13px;">
+      เลือกทีมของหนูให้เรียบร้อย แล้วค่อยเข้าไปเล่นเกมล่าฐานนิยมกันนะ 💖
+    </p>
+
+    <!-- หน้าแรก: เลือกทีมก่อนเข้าเกม -->
+    <div id="startSection" class="section-card blue">
+      <h2>👥 ขั้นตอนที่ 1: ตั้งค่า “ทีม” ก่อนเล่น</h2>
+      <p class="label">ชื่อทีม / หมู่เรียน</p>
+      <input id="teamName" class="text-input" type="text" placeholder="เช่น ทีมสถิติสายฟ้า ห้อง ม.2/1">
+      <p class="label" style="margin-top:6px;">สมาชิกในทีม</p>
+      <textarea id="teamMembers" placeholder="กรอกชื่อเล่นหรือชื่อจริงของสมาชิกในทีม เช่น แพรว, โบ, แบงค์"></textarea>
+      <p class="small">
+        ✔ แนะนำให้ 1 กลุ่มใช้ 1 เครื่อง แล้วช่วยกันคิดคำตอบในแต่ละรอบ<br>
+        ✔ ข้อมูลนี้จะถูกบันทึกไปกับผลการตอบ เพื่อง่ายต่อการตรวจของคุณครู
+      </p>
+      <div class="buttons">
+        <button class="btn-primary" onclick="startGame()">เริ่มเล่นเกมฐานนิยม ▶</button>
+      </div>
+    </div>
+
+    <!-- ส่วนเกมหลัก: ซ่อนไว้ก่อน จะแสดงเมื่อกดเริ่ม -->
+    <div id="gameSection" style="display:none; margin-top:12px;">
+      <div class="scoreboard">
+        <div class="scoreboard-title">🎮 กระดานคะแนนทีม</div>
+        <div id="teamNameDisplay" class="team-name-display">ทีม: -</div>
+        <div class="scoreboard-row">
+          <span>คะแนนรวม</span>
+          <span id="totalScore">0</span>
+        </div>
+        <div class="scoreboard-row">
+          <span>จำนวนรอบที่เล่น</span>
+          <span id="roundCount">0</span>
+        </div>
+        <div class="scoreboard-row">
+          <span>ตอบถูกติดกัน (สตรีค)</span>
+          <span id="streak">0</span>
+        </div>
+        <div class="scoreboard-row">
+          <span>คะแนนรอบล่าสุด</span>
+          <span id="lastScore">-</span>
+        </div>
+        <span class="badge-pill">ยิ่งตอบถูกไว & ถูกติดกันหลายรอบ → คะแนนยิ่งสูง!</span>
+      </div>
+
+      <h2>1️⃣ ชุดตัวเลขของทีม (5 ครั้ง)</h2>
+      <p class="small">
+        กด “สุ่มชุดตัวเลขใหม่” แล้วช่วยกันในทีมดูว่าข้อมูลมีตัวเลขไหนซ้ำ หรือไม่มีตัวไหนซ้ำเลย
+      </p>
+
+      <div class="inputs-row">
+        <input id="n1" type="number" inputmode="numeric" placeholder="ครั้งที่ 1">
+        <input id="n2" type="number" inputmode="numeric" placeholder="ครั้งที่ 2">
+        <input id="n3" type="number" inputmode="numeric" placeholder="ครั้งที่ 3">
+        <input id="n4" type="number" inputmode="numeric" placeholder="ครั้งที่ 4">
+        <input id="n5" type="number" inputmode="numeric" placeholder="ครั้งที่ 5">
+      </div>
+
+      <div class="buttons">
+        <button class="btn-primary" onclick="randomizeNumbers()">🎲 สุ่มชุดตัวเลขใหม่</button>
+        <button class="btn-secondary" onclick="clearNumbers()">ล้างตัวเลข</button>
+      </div>
+
+      <h2>2️⃣ คำตอบของทีม</h2>
+      <p class="label">ใส่คำตอบฐานนิยมของชุดข้อมูลนี้</p>
+      <input id="answer" class="answer-input" type="number" inputmode="numeric" placeholder="ใส่ค่าฐานนิยม (ถ้ามี)">
+      <div class="no-mode-row">
+        <input type="checkbox" id="noMode" onchange="toggleNoMode()">
+        <label for="noMode">ไม่มีฐานนิยม (ทุกค่าปรากฏไม่ซ้ำกันเลย)</label>
+      </div>
+
+      <div class="buttons">
+        <button class="btn-primary" onclick="checkMode()">✅ ตรวจคำตอบของทีม</button>
+        <button class="btn-warning" onclick="resetGame()">รีเซ็ตคะแนนทีม</button>
+      </div>
+
+      <div id="result" class="result neutral" style="display:none;"></div>
+
+      <div class="section-card" style="margin-top:14px;">
+        <h2>📊 ประวัติการตอบของทีมนี้</h2>
+        <p class="small">
+          ระบบจะบันทึกทุกครั้งที่กด “ตรวจคำตอบของทีม”<br>
+          หลังจบคาบเรียน ทีมสามารถกด “ดาวน์โหลด CSV” แล้วส่งไฟล์ให้คุณครูได้
+        </p>
+        <div class="buttons" style="margin-top:8px;">
+          <button class="btn-secondary btn-small" onclick="toggleHistory()">แสดง / ซ่อนประวัติ</button>
+          <button class="btn-secondary btn-small" onclick="downloadCSV()">ดาวน์โหลดเป็นไฟล์ CSV</button>
+        </div>
+        <div id="historyContainer" class="history-container" style="display:none;">
+          <div id="historyContent" class="small">ยังไม่มีประวัติการตอบในตอนนี้</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREDIT SECTION -->
+    <div class="credit">
+      พัฒนาโดย<br>
+      <strong>คุณครูณัฐนิชา ผิวทองงาม</strong><br>
+      โรงเรียนวัดหนองมะค่า
+    </div>
+  </div>
+
+  <script>
+    let startTime = null;
+    let totalScore = 0;
+    let roundCount = 0;
+    let streak = 0;
+    let attemptLog = [];
+
+    function startGame() {
+      const name = document.getElementById('teamName').value.trim();
+      const members = document.getElementById('teamMembers').value.trim();
+
+      if (!name) {
+        alert('กรุณากรอกชื่อทีมก่อนเริ่มเล่นเกมนะคะ');
+        return;
+      }
+
+      document.getElementById('startSection').style.display = 'none';
+      document.getElementById('gameSection').style.display = 'block';
+      updateTeamNameDisplay(name);
+    }
+
+    function updateTeamNameDisplay(name) {
+      const display = document.getElementById('teamNameDisplay');
+      if (name && name.trim() !== '') {
+        display.textContent = 'ทีม: ' + name.trim();
+      } else {
+        display.textContent = 'ทีม: -';
+      }
+    }
+
+    function getNumbers() {
+      const ids = ['n1', 'n2', 'n3', 'n4', 'n5'];
+      const nums = [];
+      for (const id of ids) {
+        const val = document.getElementById(id).value;
+        if (val !== '') {
+          const num = Number(val);
+          if (!Number.isNaN(num)) {
+            nums.push(num);
+          }
+        }
+      }
+      return nums;
+    }
+
+    function calculateMode(numbers) {
+      const freq = {};
+      numbers.forEach(n => {
+        freq[n] = (freq[n] || 0) + 1;
+      });
+
+      let maxCount = 0;
+      for (const key in freq) {
+        if (freq[key] > maxCount) maxCount = freq[key];
+      }
+
+      if (maxCount <= 1) {
+        return { modes: [], maxCount: 1, hasMode: false };
+      }
+
+      const modes = Object.keys(freq)
+        .filter(key => freq[key] == maxCount)
+        .map(k => Number(k));
+
+      return { modes, maxCount, hasMode: true };
+    }
+
+    function randomizeNumbers() {
+      const min = 1;
+      const max = 20;
+      const ids = ['n1', 'n2', 'n3', 'n4', 'n5'];
+      ids.forEach(id => {
+        const rand = Math.floor(Math.random() * (max - min + 1)) + min;
+        document.getElementById(id).value = rand;
+      });
+      document.getElementById('answer').value = '';
+      document.getElementById('noMode').checked = false;
+      toggleNoMode();
+      const resultBox = document.getElementById('result');
+      resultBox.style.display = 'none';
+      resultBox.textContent = '';
+      startTime = Date.now();
+    }
+
+    function clearNumbers() {
+      const ids = ['n1', 'n2', 'n3', 'n4', 'n5'];
+      ids.forEach(id => document.getElementById(id).value = '');
+      document.getElementById('answer').value = '';
+      document.getElementById('noMode').checked = false;
+      toggleNoMode();
+      const resultBox = document.getElementById('result');
+      resultBox.style.display = 'none';
+      resultBox.textContent = '';
+      startTime = null;
+    }
+
+    function toggleNoMode() {
+      const noMode = document.getElementById('noMode').checked;
+      const answerInput = document.getElementById('answer');
+      if (noMode) {
+        answerInput.value = '';
+        answerInput.disabled = true;
+        answerInput.placeholder = 'เลือกแล้วว่าไม่มีฐานนิยม';
+      } else {
+        answerInput.disabled = false;
+        answerInput.placeholder = 'ใส่ค่าฐานนิยม (ถ้ามี)';
+      }
+    }
+
+    function updateScoreboard(lastScoreValue = null) {
+      document.getElementById('totalScore').textContent = totalScore;
+      document.getElementById('roundCount').textContent = roundCount;
+      document.getElementById('streak').textContent = streak;
+      document.getElementById('lastScore').textContent =
+        lastScoreValue === null ? '-' : lastScoreValue;
+    }
+
+    function checkMode() {
+      const resultBox = document.getElementById('result');
+      const numbers = getNumbers();
+
+      if (numbers.length === 0) {
+        resultBox.style.display = 'block';
+        resultBox.className = 'result neutral';
+        resultBox.textContent = 'กรุณากรอกหรือสุ่มตัวเลขอย่างน้อย 1 ค่า ก่อนตรวจคำตอบนะ 🙂';
+        return;
+      }
+
+      const { modes, maxCount, hasMode } = calculateMode(numbers);
+      const noModeChecked = document.getElementById('noMode').checked;
+      const studentVal = document.getElementById('answer').value;
+
+      if (!noModeChecked && studentVal === '') {
+        resultBox.style.display = 'block';
+        resultBox.className = 'result neutral';
+        resultBox.textContent = 'กรุณาใส่ค่าฐานนิยม หรือเลือกว่าข้อมูลชุดนี้ไม่มีฐานนิยมก่อนค่ะ';
+        return;
+      }
+
+      let elapsedSec = null;
+      if (startTime !== null) {
+        elapsedSec = (Date.now() - startTime) / 1000;
+      }
+
+      let isCorrect = false;
+      let studentAnswer = null;
+
+      if (!hasMode) {
+        isCorrect = noModeChecked;
+      } else {
+        if (noModeChecked) {
+          isCorrect = false;
+        } else {
+          studentAnswer = Number(studentVal);
+          isCorrect = modes.includes(studentAnswer);
+        }
+      }
+
+      roundCount += 1;
+
+      let roundScore = 0;
+      let timeScore = 0;
+      let bonus = 0;
+      let details = '';
+
+      if (isCorrect) {
+        if (elapsedSec === null) {
+          timeScore = 10;
+        } else if (elapsedSec <= 5) {
+          timeScore = 30;
+        } else if (elapsedSec <= 10) {
+          timeScore = 20;
+        } else if (elapsedSec <= 20) {
+          timeScore = 10;
+        } else {
+          timeScore = 5;
+        }
+
+        streak += 1;
+        if (streak >= 3) {
+          bonus = 10;
+        }
+
+        roundScore = timeScore + bonus;
+        totalScore += roundScore;
+
+        resultBox.style.display = 'block';
+        resultBox.className = 'result correct';
+
+        details += '⏱ เวลาในการคิดของทีม: ' + (elapsedSec !== null ? elapsedSec.toFixed(1) + ' วินาที' : 'ไม่ระบุ') + '<br>';
+        details += '⭐ คะแนนจากเวลา: ' + timeScore + ' คะแนน<br>';
+        if (bonus > 0) {
+          details += '🔥 โบนัสสตรีค (ตอบถูกติดกัน ' + streak + ' ครั้ง): +' + bonus + ' คะแนน<br>';
+        }
+
+        if (hasMode) {
+          resultBox.innerHTML =
+            '✅ ตอบถูกต้อง!<br>' +
+            'ฐานนิยมของข้อมูลชุดนี้คือ: <strong>' + modes.join(', ') + '</strong><br>' +
+            details +
+            '<strong>คะแนนรอบนี้ของทีม: ' + roundScore + ' คะแนน</strong>';
+        } else {
+          resultBox.innerHTML =
+            '✅ ตอบถูกต้อง! ข้อมูลชุดนี้ <strong>ไม่มีฐานนิยม</strong><br>' +
+            '<span class="small">เพราะทุกค่าปรากฏเพียง 1 ครั้งเท่านั้น</span><br>' +
+            details +
+            '<strong>คะแนนรอบนี้ของทีม: ' + roundScore + ' คะแนน</strong>';
+        }
+
+        updateScoreboard(roundScore);
+      } else {
+        streak = 0;
+        roundScore = 0;
+
+        resultBox.style.display = 'block';
+        resultBox.className = 'result incorrect';
+
+        details += '⏱ เวลาในการคิดของทีม: ' + (elapsedSec !== null ? elapsedSec.toFixed(1) + ' วินาที' : 'ไม่ระบุ') + '<br>';
+
+        if (hasMode) {
+          resultBox.innerHTML =
+            '❌ ตอบยังไม่ถูก ลองปรึกษากันในทีมอีกนิดนะ<br>' +
+            details +
+            'คำตอบที่ถูกต้อง ฐานนิยมคือ: <strong>' + modes.join(', ') + '</strong><br>' +
+            '<span class="small">ค่าเหล่านี้ปรากฏทั้งหมด ' + maxCount + ' ครั้ง</span>';
+        } else {
+          resultBox.innerHTML =
+            '❌ ตอบยังไม่ถูก ลองปรึกษากันในทีมอีกนิดนะ<br>' +
+            details +
+            'ข้อมูลชุดนี้ <strong>ไม่มีฐานนิยม</strong><br>' +
+            '<span class="small">เพราะทุกค่าปรากฏเพียง 1 ครั้งเท่านั้น</span>';
+        }
+
+        updateScoreboard(roundScore);
+      }
+
+      logAttempt({
+        teamName: document.getElementById('teamName').value.trim(),
+        teamMembers: document.getElementById('teamMembers').value.trim(),
+        timestamp: new Date().toLocaleString('th-TH'),
+        round: roundCount,
+        numbers: numbers.slice(),
+        hasMode: hasMode,
+        correctModes: hasMode ? modes.slice() : [],
+        correctHasMode: hasMode,
+        studentAnswer: studentAnswer,
+        studentNoMode: noModeChecked,
+        isCorrect: isCorrect,
+        elapsedSec: elapsedSec,
+        roundScore: roundScore,
+        totalScoreAfter: totalScore
+      });
+
+      startTime = null;
+    }
+
+    function logAttempt(entry) {
+      attemptLog.push(entry);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('historyContent');
+      if (attemptLog.length === 0) {
+        container.textContent = 'ยังไม่มีประวัติการตอบในตอนนี้';
+        return;
+      }
+
+      let html = '<table><thead><tr>' +
+        '<th>รอบ</th>' +
+        '<th>เวลา</th>' +
+        '<th>ตัวเลข</th>' +
+        '<th>คำตอบทีม</th>' +
+        '<th>เฉลยที่ถูกต้อง</th>' +
+        '<th>ถูก/ผิด</th>' +
+        '<th>คะแนนรอบ</th>' +
+        '</tr></thead><tbody>';
+
+      attemptLog.forEach(a => {
+        const nums = a.numbers.join(', ');
+        let teamAnswerText = '';
+        if (a.studentNoMode) {
+          teamAnswerText = 'ไม่มีฐานนิยม';
+        } else if (a.studentAnswer !== null && a.studentAnswer !== undefined) {
+          teamAnswerText = String(a.studentAnswer);
+        } else {
+          teamAnswerText = '-';
+        }
+
+        let correctText = '';
+        if (!a.correctHasMode) {
+          correctText = 'ไม่มีฐานนิยม';
+        } else {
+          correctText = a.correctModes.join(', ');
+        }
+
+        const correctnessChip = a.isCorrect
+          ? '<span class="chip-correct">ถูก</span>'
+          : '<span class="chip-incorrect">ผิด</span>';
+
+        html += '<tr>' +
+          '<td>' + a.round + '</td>' +
+          '<td>' + a.timestamp + '</td>' +
+          '<td>' + nums + '</td>' +
+          '<td>' + teamAnswerText + '</td>' +
+          '<td>' + correctText + '</td>' +
+          '<td>' + correctnessChip + '</td>' +
+          '<td>' + a.roundScore + '</td>' +
+          '</tr>';
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function toggleHistory() {
+      const box = document.getElementById('historyContainer');
+      if (box.style.display === 'none' || box.style.display === '') {
+        box.style.display = 'block';
+        renderHistory();
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    function downloadCSV() {
+      if (attemptLog.length === 0) {
+        alert('ยังไม่มีข้อมูลประวัติการตอบให้ดาวน์โหลด');
+        return;
+      }
+
+      const teamName = document.getElementById('teamName').value.trim() || 'no_teamname';
+      const safeTeamName = teamName.replace(/[^ก-ฮะ-๙a-zA-Z0-9_-]+/g, '_');
+
+      const header = [
+        'team_name',
+        'team_members',
+        'round',
+        'timestamp',
+        'numbers',
+        'has_mode',
+        'correct_modes',
+        'correct_has_mode',
+        'student_answer',
+        'student_selected_no_mode',
+        'is_correct',
+        'elapsed_seconds',
+        'round_score',
+        'total_score_after_round'
+      ];
+
+      const rows = [header.join(',')];
+
+      attemptLog.forEach(a => {
+        const row = [
+          '"' + (a.teamName || '').replace(/"/g, '""') + '"',
+          '"' + (a.teamMembers || '').replace(/"/g, '""') + '"',
+          a.round,
+          '"' + a.timestamp.replace(/"/g, '""') + '"',
+          '"' + a.numbers.join(' ') + '"',
+          a.hasMode ? 'TRUE' : 'FALSE',
+          '"' + (a.correctModes.join(' ') || '') + '"',
+          a.correctHasMode ? 'TRUE' : 'FALSE',
+          (a.studentAnswer !== null && a.studentAnswer !== undefined) ? a.studentAnswer : '',
+          a.studentNoMode ? 'TRUE' : 'FALSE',
+          a.isCorrect ? 'TRUE' : 'FALSE',
+          a.elapsedSec !== null && a.elapsedSec !== undefined ? a.elapsedSec.toFixed(2) : '',
+          a.roundScore,
+          a.totalScoreAfter
+        ];
+        rows.push(row.join(','));
+      });
+
+      const csvContent = rows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      const fileName = 'mode_quest_log_' + safeTeamName + '.csv';
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function resetGame() {
+      totalScore = 0;
+      roundCount = 0;
+      streak = 0;
+      attemptLog = [];
+      updateScoreboard(null);
+      clearNumbers();
+      renderHistory();
+    }
+
+    // ค่าเริ่มต้น
+    updateScoreboard(null);
+  </script>
+</body>
+</html>
